@@ -1,0 +1,52 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: { 
+    default: { file: cabin.fnt },
+    title: { file: title.fnt },
+    h3: { file: h3.fnt },
+},
+com.badlogic.gdx.graphics.Color: {
+	white: { a: 1, b: 1, g: 1, r: 1 },
+	black: { a: 1, b: 0, g: 0, r: 0 },
+	blue: {a: 1, b: 255, g: 144, r: 0},
+	gray: {a: .5, b: 1, g: 1, r: 1}
+},
+com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable: {
+    scrollbar: { region: scroll }
+},
+com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+	default: { down: button_down, up: button, over: button_down },
+},
+com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
+	default: { down: button_down, up: button, over: button_down, checked: button_down, 
+	           font: default, fontColor: white, downFontColor: white, checkedFontColor: blue, overFontColor: white },
+	title: {font: title, fontColor: gray, downFontColor: white, overFontColor: white}
+},
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: { background: pane, vScrollKnob: box, vScroll: slide-empty },
+	prompt: { background: box, vScrollKnob: button_down },
+},
+com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
+	default: {
+		font: default, fontColor: white, background: box, backgroundOpen: box,
+		scrollStyle: default,
+		listStyle: { font: default, selection: button_down },
+		scrollStyle: {background: box}
+	},
+},
+com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
+	default: { font: default, fontColor: white },
+	title: {font: title, fontColor: white},
+	h3: {font: h3, fontColor: white},
+},
+com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
+	default: { background: button, focusedBackground: button_down, font: default, fontColor: white, cursor: textcursor }
+},
+com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
+	default: { checkboxOff: switch-dark-off,
+	           checkboxOn: switch-dark-on,
+	           font: default },
+},
+com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
+	default-horizontal: {background: slide, knob: knob, knobAfter: slide-empty}
+}
+}
