@@ -11,6 +11,7 @@ import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -59,6 +60,7 @@ public class MainScreen implements Screen, Agent {
 	//label used for indicating download and update progress of the app
 	Label updateLabel;
 	protected ScrollPane cleanDialog;
+	LoadingAnimation loadingAnimation;
 	
 	@Override
 	public void show() {
@@ -253,6 +255,8 @@ public class MainScreen implements Screen, Agent {
 		
 		mainButtons = buttonList;
 		mainButtons.setColor(1,1,1,0);
+		
+		loadingAnimation = new LoadingAnimation(skin, ui);
 
 		//create the ui state machine
 		uiMachine.changeState(States.Home);
@@ -272,6 +276,9 @@ public class MainScreen implements Screen, Agent {
 
 	@Override
 	public void render(float delta) {
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		
 		ui.act(delta);
 		update(delta);
 		

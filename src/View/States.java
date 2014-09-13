@@ -42,12 +42,14 @@ enum States implements State<MainScreen>
 
 					@Override
 					public void endTask() { 
+						scene.loadingAnimation.showLoading();
 						scene.updateLabel.addAction(
 							Actions.sequence(
 								Actions.alpha(0f, .3f),
 								Actions.run(new Runnable(){
 									public void run()
 									{
+										scene.loadingAnimation.showLoading();
 										//change the label's text
 										scene.updateLabel.setText("Cloning Complete, enjoy the game");
 										scene.updateLabel.pack();
@@ -79,6 +81,7 @@ enum States implements State<MainScreen>
 				};
 				
 				final Thread gitThread = GitUtils.cloneRepo(scene.repository, scene.branch, gameDir, monitor);
+				scene.background.addAction(Actions.alpha(.5f, .2f, Interpolation.linear));
 				scene.mainButtons.setVisible(false);
 				scene.updateLabel.addAction(
 					Actions.sequence(
@@ -105,8 +108,15 @@ enum States implements State<MainScreen>
 			}
 			else
 			{
+				scene.background.addAction(Actions.alpha(1f, .2f, Interpolation.linear));
 				scene.mainButtons.addAction(Actions.alpha(1f, .4f));
 			}
+		}
+		
+		@Override
+		public void exit(MainScreen scene)
+		{
+			scene.background.addAction(Actions.alpha(.5f, .2f, Interpolation.linear));
 		}
 		
 		@Override
@@ -204,6 +214,7 @@ enum States implements State<MainScreen>
 						Actions.run(new Runnable(){
 							public void run()
 							{
+								scene.loadingAnimation.showLoading();
 								//change the label's text
 								scene.updateLabel.setText(String.format(format, scene.repository, scene.branch));
 								scene.updateLabel.pack();
@@ -255,6 +266,7 @@ enum States implements State<MainScreen>
 					Actions.run(new Runnable(){
 						public void run()
 						{
+							scene.loadingAnimation.hideLoading();
 							//change the label's text
 							scene.updateLabel.setText("Game Files are up to date!");
 							scene.updateLabel.pack();
@@ -452,4 +464,14 @@ enum States implements State<MainScreen>
 
 	@Override
 	public void update(MainScreen arg0) { }
+	
+	private void loadingAnimation(MainScreen scene)
+	{
+		
+	}
+	
+	private void hideLoading(MainScreen scene)
+	{
+		
+	}
 }
