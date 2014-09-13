@@ -17,5 +17,9 @@
             <zipfileset excludes="META-INF/*.SF" src="../libs/jgit-3.4.1.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="../libs/jsch-0.1.51.jar"/>
         </jar>
+    	<copy file="../boogie.cfg" tofile="../build/jar/boogie.cfg" />
+    	<copy file="../background.png" tofile="../build/jar/background.png" />
+    	<copy file="../build/run.bat" tofile="../build/jar/run.bat" />
+    	<copy file="../build/run.sh" tofile="../build/jar/run.sh" />
     </target>
 </project>
