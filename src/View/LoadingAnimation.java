@@ -28,7 +28,7 @@ public class LoadingAnimation {
 				Actions.parallel(
 					Actions.alpha(1f, .5f), 
 					Actions.repeat(-1, 
-						Actions.rotateBy(360f, 1.5f, Interpolation.sine)
+						Actions.rotateBy(360f, .9f, Interpolation.linear)
 					)
 				)
 			)
