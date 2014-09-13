@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -138,6 +139,8 @@ public class MainScreen implements Screen, Agent {
 			}		
 		});
 		buttonList.add(update).expandX().align(Align.right).row();
+		
+		//parse and load readme file if it exists
 		FileHandle readmeFile = GitUtils.internalToAbsolute(Boogie.GAME_DIR+"/README");
 		if (readmeFile.exists())
 		{
@@ -182,6 +185,7 @@ public class MainScreen implements Screen, Agent {
 			readmeView.setFadeScrollBars(false);
 			ui.addActor(readmeView);
 		}
+		
 		TextButton quit = new TextButton("Quit", skin, "title");
 		quit.addListener(new ChangeListener(){
 			@Override
@@ -211,6 +215,7 @@ public class MainScreen implements Screen, Agent {
 		runPopup.pack();
 		runPopup.setPosition(ui.getWidth() / 2f - runPopup.getWidth() / 2f, ui.getHeight() / 2f - runPopup.getHeight() / 2f);
 		runPopup.setColor(1,1,1,0);
+		runPopup.setTouchable(Touchable.disabled);
 		ui.addActor(runPopup);
 		
 		//prepare clean files dialog
