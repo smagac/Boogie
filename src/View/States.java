@@ -81,6 +81,7 @@ enum States implements State<MainScreen>
 				
 				final Thread gitThread = GitUtils.cloneRepo(scene.repository, scene.branch, gameDir, monitor);
 				scene.background.addAction(Actions.alpha(.5f, .2f, Interpolation.linear));
+				scene.background.setTouchable(Touchable.disabled);
 				scene.loadingAnimation.showLoading();
 				scene.mainButtons.setVisible(false);
 				scene.updateLabel.addAction(

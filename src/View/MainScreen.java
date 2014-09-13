@@ -76,10 +76,10 @@ public class MainScreen implements Screen, Agent {
 		JsonReader j = new JsonReader();
 		JsonValue cfg = j.parse(Gdx.files.internal("boogie.cfg"));
 		String os = System.getProperty("os.name");
-		if (os.contains("OS X"))
+		if (os.toLowerCase().contains("OS X"))
 		{
 			cmd = cfg.get("game").get("execute").getString("mac");
-		} else if (os.contains("windows"))
+		} else if (os.toLowerCase().contains("windows"))
 		{
 			cmd = cfg.get("game").get("execute").getString("win");
 		} else
