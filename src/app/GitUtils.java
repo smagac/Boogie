@@ -11,6 +11,7 @@ import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ProgressMonitor;
+import org.eclipse.jgit.lib.StoredConfig;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
@@ -35,7 +36,7 @@ public class GitUtils {
 	 *   Progress monitor useful for hooking into the clone cmd and provide useful visual feedback
 	 * @return a contained thread for executing and waiting on the command
 	 */
-	public static Thread cloneRepo(String repo, String branch, FileHandle downloadDir, ProgressMonitor monitor)
+	public static Thread cloneRepo(String repo, final String branch, FileHandle downloadDir, ProgressMonitor monitor)
 	{
 		final CloneCommand cmd = Git.cloneRepository()
 				.setURI(repo)
@@ -48,8 +49,15 @@ public class GitUtils {
 		Thread callThread = new Thread(new Runnable(){
 			public void run(){
 				try {
-					cmd.call().close();
-				} catch (GitAPIException e) {
+					Git src = cmd.call();
+					
+					StoredConfig config = src.getRepository().getConfig();
+					config.setString("remote", "origin", "fetch", "+refs/heads/" + branch + ":refs/remotes/origin/" + branch);
+					config.save();
+					
+					src.close();
+				
+				} catch (GitAPIException | IOException e) {
 					e.printStackTrace();
 				}
 			}
