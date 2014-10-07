@@ -1,7 +1,7 @@
 package View;
 
 import app.Boogie;
-import app.GitUtils;
+import app.DownloadUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -40,7 +40,6 @@ public class MainScreen implements Screen, Agent {
 	 * main git repository for downloading the latest version of the managed app
 	 */
 	String repository;
-	String branch;
 	
 	/**
 	 * Command executed depending on your operating system
@@ -87,8 +86,7 @@ public class MainScreen implements Screen, Agent {
 			cmd = cfg.get("game").get("execute").getString("nix");
 		}
 		System.out.println(os + " " + cmd);
-		repository = cfg.get("repo").getString("url");
-		branch = cfg.get("repo").getString("branch");
+		repository = cfg.getString("url");
 		
 		//fill the background with a cfg defined background
 		background = new Image(
@@ -141,7 +139,7 @@ public class MainScreen implements Screen, Agent {
 		buttonList.add(update).expandX().align(Align.right).row();
 		
 		//parse and load readme file if it exists
-		FileHandle readmeFile = GitUtils.internalToAbsolute(Boogie.GAME_DIR+"/README");
+		FileHandle readmeFile = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR+"/README");
 		if (readmeFile.exists())
 		{
 			TextButton readme = new TextButton("Readme", skin, "title");
