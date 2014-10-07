@@ -1,10 +1,9 @@
 package View;
 
 import java.io.IOException;
-import org.eclipse.jgit.lib.ProgressMonitor;
 
 import app.Boogie;
-import app.GitUtils;
+import app.DownloadUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
@@ -23,63 +22,19 @@ enum States implements State<MainScreen>
 {
 	Home(){
 		//format used for cloning
-		String format = "Cloning data from %s:%s";
+		String format = "Cloning data from %s";
+		Thread gitThread;
 		
 		@Override
 		public void enter(final MainScreen scene) {
 			//make sure git is set up and cloned before allowing the game to be played/launched
-			if (!GitUtils.gitExists())
+			if (!DownloadUtils.gameExists())
 			{
 				//make sure all the folders for the downloading exists
-				FileHandle gameDir = GitUtils.internalToAbsolute(Boogie.GAME_DIR);
+				FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
 				gameDir.mkdirs();
 				
-				ProgressMonitor monitor = new ProgressMonitor(){
-
-					@Override
-					public void beginTask(String title, int totalWork) { 
-					}
-
-					@Override
-					public void endTask() { 
-						scene.updateLabel.addAction(
-							Actions.sequence(
-								Actions.alpha(0f, .3f),
-								Actions.run(new Runnable(){
-									public void run()
-									{
-										scene.loadingAnimation.hideLoading();
-										//change the label's text
-										scene.updateLabel.setText("Cloning Complete, enjoy the game");
-										scene.updateLabel.pack();
-									}
-								}),
-								Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
-								Actions.alpha(1f),
-								Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
-								Actions.delay(3f),
-								Actions.alpha(0f, .3f),
-								Actions.delay(1f),
-								Actions.run(new Runnable(){
-									public void run(){
-										Boogie.app.setScreen(new MainScreen());
-									}
-								})
-							)
-						);
-					}
-
-					@Override
-					public boolean isCancelled() { return false; }
-
-					@Override
-					public void start(int totalTasks) { }
-
-					@Override
-					public void update(int completed) { }
-				};
-				
-				final Thread gitThread = GitUtils.cloneRepo(scene.repository, scene.branch, gameDir, monitor);
+				gitThread = DownloadUtils.cloneRepo(scene.repository, gameDir);
 				scene.background.addAction(Actions.alpha(.5f, .2f, Interpolation.linear));
 				scene.background.setTouchable(Touchable.disabled);
 				scene.loadingAnimation.showLoading();
@@ -91,7 +46,7 @@ enum States implements State<MainScreen>
 							public void run()
 							{
 								//change the label's text
-								scene.updateLabel.setText(String.format(format, scene.repository, scene.branch));
+								scene.updateLabel.setText(String.format(format, scene.repository));
 								scene.updateLabel.pack();
 							}
 						}),
@@ -111,6 +66,41 @@ enum States implements State<MainScreen>
 			{
 				scene.background.addAction(Actions.alpha(1f, .2f, Interpolation.linear));
 				scene.mainButtons.addAction(Actions.alpha(1f, .4f));
+			}
+		}
+		
+		public void update(final MainScreen scene) {
+			if (gitThread != null)
+			{
+				if (!gitThread.isAlive() && gitThread.getState() != Thread.State.NEW)
+				{
+					scene.updateLabel.addAction(
+						Actions.sequence(
+							Actions.alpha(0f, .3f),
+							Actions.run(new Runnable(){
+								public void run()
+								{
+									scene.loadingAnimation.hideLoading();
+									//change the label's text
+									scene.updateLabel.setText("Cloning Complete, enjoy the game");
+									scene.updateLabel.pack();
+								}
+							}),
+							Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
+							Actions.alpha(1f),
+							Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
+							Actions.delay(3f),
+							Actions.alpha(0f, .3f),
+							Actions.delay(1f),
+							Actions.run(new Runnable(){
+								public void run(){
+									Boogie.app.setScreen(new MainScreen());
+								}
+							})
+						)
+					);
+					gitThread = null;
+				}
 			}
 		}
 		
@@ -197,7 +187,7 @@ enum States implements State<MainScreen>
 	},
 	Update(){
 		
-		static final String format = "Pulling data from %s:%s";
+		static final String format = "Pulling data from %s";
 		Thread gitThread;
 		
 		@Override
@@ -206,8 +196,8 @@ enum States implements State<MainScreen>
 				scene.mainButtons.addAction(Actions.alpha(.4f, .3f));
 				scene.ui.getRoot().setTouchable(Touchable.disabled);
 			
-				FileHandle gameDir = GitUtils.internalToAbsolute(Boogie.GAME_DIR);
-				gitThread = GitUtils.pullRepo(gameDir, scene.branch, null);
+				FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
+				gitThread = DownloadUtils.pullRepo(scene.repository, gameDir, false);
 				
 				scene.updateLabel.addAction(
 					Actions.sequence(
@@ -217,7 +207,7 @@ enum States implements State<MainScreen>
 							{
 								scene.loadingAnimation.showLoading();
 								//change the label's text
-								scene.updateLabel.setText(String.format(format, scene.repository, scene.branch));
+								scene.updateLabel.setText(String.format(format, scene.repository));
 								scene.updateLabel.pack();
 							}
 						}),
@@ -307,7 +297,7 @@ enum States implements State<MainScreen>
 						String cmd = scene.cmd + scene.settings.getValuesArg();
 						
 						ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
-						pb.directory(GitUtils.internalToAbsolute(Boogie.GAME_DIR).file());
+						pb.directory(DownloadUtils.internalToAbsolute(Boogie.GAME_DIR).file());
 						game = pb.start();
 						game.waitFor();
 						
@@ -396,7 +386,7 @@ enum States implements State<MainScreen>
 			}
 			else if (telegram.message == StateMessage.Clean)
 			{
-				deleteThread = GitUtils.clean();
+				deleteThread = DownloadUtils.clean();
 				scene.cleanDialog.addAction(
 					Actions.sequence(
 						Actions.moveTo(scene.cleanDialog.getX(), scene.ui.getHeight() / 2f  - scene.cleanDialog.getHeight()/2f),
