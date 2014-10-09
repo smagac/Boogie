@@ -43,7 +43,9 @@ public class DownloadUtils {
 						 FileOutputStream fos = new FileOutputStream(downloadDir.child("boogie.hash").file()) ) {
 						fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 						//parse the hash file
-						pullRepo(url, downloadDir, true).start();
+						Thread pull = pullRepo(url, downloadDir, true);
+						pull.start();
+						while (pull.isAlive());
 					} catch (IOException e) {
 						e.printStackTrace();
 						Gdx.app.exit();
