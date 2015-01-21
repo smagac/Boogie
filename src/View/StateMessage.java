@@ -6,11 +6,15 @@ package View;
  */
 public final class StateMessage
 {
-	static final int OpenReadme = 4;
-	static final int PlayGame = 0;
-	static final int OpenSettings = 1;
-	static final int ExitGame = 2;
-	static final int UpdateGame = 3;
-	static final int Clean = 10;
-	static final int Home = 11;
+	public static final int OpenReadme = 4;
+	public static final int PlayGame = 0;
+	public static final int OpenSettings = 1;
+	public static final int ExitGame = 2;
+	public static final int UpdateGame = 3;
+	public static final int Clean = 10;
+	public static final int Home = 11;
+	
+	public static final int DownloadCancelled = 12;
+	public static final int DownloadFailed = 13;
+	public static final int DownloadCompleted = 14;
 }

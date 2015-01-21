@@ -8,7 +8,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 public class Boogie {
 
 	public static Game app;
-	public static final String GAME_DIR = "bin/game";
+	public static final String GAME_DIR = "bin/game/";
 	
 	/**
 	 * Launches Boogie

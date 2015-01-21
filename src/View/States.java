@@ -23,18 +23,16 @@ enum States implements State<MainScreen>
 	Home(){
 		//format used for cloning
 		String format = "Cloning data from %s";
-		Thread gitThread;
 		
 		@Override
 		public void enter(final MainScreen scene) {
-			//make sure git is set up and cloned before allowing the game to be played/launched
+			//make sure the game is set up and cloned before allowing the game to be played/launched
 			if (!DownloadUtils.gameExists())
 			{
 				//make sure all the folders for the downloading exists
-				FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
+				final FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
 				gameDir.mkdirs();
 				
-				gitThread = DownloadUtils.cloneRepo(scene.repository, gameDir);
 				scene.background.addAction(Actions.alpha(.5f, .2f, Interpolation.linear));
 				scene.background.setTouchable(Touchable.disabled);
 				scene.loadingAnimation.showLoading();
@@ -56,7 +54,7 @@ enum States implements State<MainScreen>
 						Actions.run(new Runnable(){
 							public void run()
 							{
-								gitThread.start();
+								DownloadUtils.cloneRepo(scene.repository, gameDir);
 							}
 						})
 					)	
@@ -69,41 +67,6 @@ enum States implements State<MainScreen>
 			}
 		}
 		
-		public void update(final MainScreen scene) {
-			if (gitThread != null)
-			{
-				if (!gitThread.isAlive() && gitThread.getState() != Thread.State.NEW)
-				{
-					scene.updateLabel.addAction(
-						Actions.sequence(
-							Actions.alpha(0f, .3f),
-							Actions.run(new Runnable(){
-								public void run()
-								{
-									scene.loadingAnimation.hideLoading();
-									//change the label's text
-									scene.updateLabel.setText("Cloning Complete, enjoy the game");
-									scene.updateLabel.pack();
-								}
-							}),
-							Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
-							Actions.alpha(1f),
-							Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
-							Actions.delay(3f),
-							Actions.alpha(0f, .3f),
-							Actions.delay(1f),
-							Actions.run(new Runnable(){
-								public void run(){
-									Boogie.app.setScreen(new MainScreen());
-								}
-							})
-						)
-					);
-					gitThread = null;
-				}
-			}
-		}
-		
 		@Override
 		public void exit(MainScreen scene)
 		{
@@ -111,7 +74,7 @@ enum States implements State<MainScreen>
 		}
 		
 		@Override
-		public boolean onMessage(MainScreen scene, Telegram t) {
+		public boolean onMessage(final MainScreen scene, Telegram t) {
 			if (t.message == StateMessage.PlayGame)
 			{
 				scene.uiMachine.changeState(PlayGame);
@@ -131,6 +94,63 @@ enum States implements State<MainScreen>
 			else if (t.message == StateMessage.ExitGame)
 			{
 				Gdx.app.exit();
+			}
+			else if (t.message == StateMessage.DownloadCompleted) {
+				scene.updateLabel.addAction(
+					Actions.sequence(
+						Actions.alpha(0f, .3f),
+						Actions.run(new Runnable(){
+							public void run()
+							{
+								scene.loadingAnimation.hideLoading();
+								//change the label's text
+								scene.updateLabel.setText("Cloning Complete, enjoy the game");
+								scene.updateLabel.pack();
+								DownloadUtils.writePerm();
+							}
+						}),
+						Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
+						Actions.alpha(1f),
+						Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
+						Actions.delay(3f),
+						Actions.alpha(0f, .3f),
+						Actions.delay(1f),
+						Actions.run(new Runnable(){
+							public void run(){
+								Boogie.app.setScreen(new MainScreen());
+							}
+						})
+					)
+				);
+				return true;
+			}
+			else if (t.message == StateMessage.DownloadFailed) {
+				scene.updateLabel.addAction(
+					Actions.sequence(
+						Actions.alpha(0f, .3f),
+						Actions.run(new Runnable(){
+							public void run()
+							{
+								scene.loadingAnimation.hideLoading();
+								//change the label's text
+								scene.updateLabel.setText("Could not establish a connection/failed to connect to remote repository.");
+								scene.updateLabel.pack();
+							}
+						}),
+						Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
+						Actions.alpha(1f),
+						Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
+						Actions.delay(3f),
+						Actions.alpha(0f, .3f),
+						Actions.delay(1f),
+						Actions.run(new Runnable(){
+							public void run(){
+								Gdx.app.exit();
+							}
+						})
+					)
+				);
+				return true;
 			}
 			return false;
 		}
@@ -188,99 +208,93 @@ enum States implements State<MainScreen>
 	Update(){
 		
 		static final String format = "Pulling data from %s";
-		Thread gitThread;
 		
 		@Override
 		public void enter(final MainScreen scene) { 
-			try {
-				scene.mainButtons.addAction(Actions.alpha(.4f, .3f));
-				scene.ui.getRoot().setTouchable(Touchable.disabled);
+			scene.mainButtons.addAction(Actions.alpha(.4f, .3f));
+			scene.ui.getRoot().setTouchable(Touchable.disabled);
+		
+			final FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
 			
-				FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
-				gitThread = DownloadUtils.pullRepo(scene.repository, gameDir, false);
-				
-				scene.updateLabel.addAction(
-					Actions.sequence(
-						Actions.alpha(0f, .3f),
-						Actions.run(new Runnable(){
-							public void run()
-							{
-								scene.loadingAnimation.showLoading();
-								//change the label's text
-								scene.updateLabel.setText(String.format(format, scene.repository));
-								scene.updateLabel.pack();
-							}
-						}),
-						Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
-						Actions.alpha(1f),
-						Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
-						Actions.run(new Runnable(){
-							public void run()
-							{
-								Gdx.app.log("Git", "Start pulling");
-								gitThread.start();
-							}
-						})
-					)	
-				);
-			} catch (IOException e) {
-				e.printStackTrace();
-				scene.updateLabel.addAction(
-					Actions.sequence(
-						Actions.alpha(0f, .3f),
-						Actions.run(new Runnable(){
-							public void run()
-							{
-								//change the label's text
-								scene.updateLabel.setText("Git directory could not be found");
-								scene.updateLabel.pack();
-							}
-						}),
-						Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
-						Actions.alpha(1f),
-						Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
-						Actions.delay(2f),
-						Actions.alpha(0f, .3f)
-					)	
-				);
-				scene.uiMachine.changeState(States.Home);
-			}
-		}
-
-		@Override
-		public void exit(final MainScreen scene) { 
-			scene.mainButtons.addAction(Actions.alpha(1f, .3f));
-			scene.ui.getRoot().setTouchable(Touchable.childrenOnly);
 			scene.updateLabel.addAction(
 				Actions.sequence(
 					Actions.alpha(0f, .3f),
 					Actions.run(new Runnable(){
 						public void run()
 						{
-							scene.loadingAnimation.hideLoading();
+							scene.loadingAnimation.showLoading();
 							//change the label's text
-							scene.updateLabel.setText("Game Files are up to date!");
+							scene.updateLabel.setText(String.format(format, scene.repository));
 							scene.updateLabel.pack();
 						}
 					}),
 					Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
 					Actions.alpha(1f),
 					Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
-					Actions.delay(3f),
-					Actions.alpha(0f, .3f)
-				)
+					Actions.run(new Runnable(){
+						public void run()
+						{
+							DownloadUtils.pullRepo(scene.repository, gameDir, false);
+						}
+					})
+				)	
 			);
 		}
+
+		@Override
+		public void exit(final MainScreen scene) { 
+			scene.mainButtons.addAction(Actions.alpha(1f, .3f));
+			scene.ui.getRoot().setTouchable(Touchable.childrenOnly);
+			
+		}
 		
-		public void update(final MainScreen scene) {
-			if (gitThread != null)
-			{
-				if (!gitThread.isAlive() && gitThread.getState() != Thread.State.NEW)
-				{
-					scene.uiMachine.changeState(Home); 
-					gitThread = null;
-				}
+		public boolean onMessage(final MainScreen scene, Telegram t) {
+			if (t.message == StateMessage.DownloadCompleted) {
+				DownloadUtils.writePerm();
+				scene.uiMachine.changeState(Home);
+				scene.updateLabel.addAction(
+					Actions.sequence(
+						Actions.alpha(0f, .3f),
+						Actions.run(new Runnable(){
+							public void run()
+							{
+								scene.loadingAnimation.hideLoading();
+								//change the label's text
+								scene.updateLabel.setText("Game Files are up to date!");
+								scene.updateLabel.pack();
+							}
+						}),
+						Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
+						Actions.alpha(1f),
+						Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
+						Actions.delay(3f),
+						Actions.alpha(0f, .3f)
+					)
+				);
+				return true;
+			} else if (t.message == StateMessage.DownloadFailed) {
+				scene.uiMachine.changeState(Home);
+				scene.updateLabel.addAction(
+					Actions.sequence(
+						Actions.alpha(0f, .3f),
+						Actions.run(new Runnable(){
+							public void run()
+							{
+								scene.loadingAnimation.hideLoading();
+								//change the label's text
+								scene.updateLabel.setText("Could not properly connect to server to update files.");
+								scene.updateLabel.pack();
+							}
+						}),
+						Actions.moveTo(-scene.updateLabel.getWidth(), scene.updateLabel.getY()),
+						Actions.alpha(1f),
+						Actions.moveTo(10f, scene.updateLabel.getY(), .3f, Interpolation.circleOut),
+						Actions.delay(3f),
+						Actions.alpha(0f, .3f)
+					)
+				);
 			}
+			return false;
 		}
 	},
 	//fork a game process with all settings appended to the execute statement as cmd line args
@@ -351,8 +365,6 @@ enum States implements State<MainScreen>
 	},
 	Clean(){
 		
-		Thread deleteThread;
-		
 		public void enter(MainScreen scene) { 
 			scene.cleanDialog.addAction(
 				Actions.sequence(
@@ -386,7 +398,7 @@ enum States implements State<MainScreen>
 			}
 			else if (telegram.message == StateMessage.Clean)
 			{
-				deleteThread = DownloadUtils.clean();
+				
 				scene.cleanDialog.addAction(
 					Actions.sequence(
 						Actions.moveTo(scene.cleanDialog.getX(), scene.ui.getHeight() / 2f  - scene.cleanDialog.getHeight()/2f),
@@ -403,7 +415,8 @@ enum States implements State<MainScreen>
 						Actions.delay(1f),
 						Actions.run(new Runnable(){
 							public void run(){
-								deleteThread.start();;
+								DownloadUtils.clean();				
+								Boogie.app.setScreen(new MainScreen());
 							}
 						})
 					)
@@ -413,33 +426,6 @@ enum States implements State<MainScreen>
 			
 			return false;
 		}
-		
-		@Override
-		public void update(MainScreen scene)
-		{
-			if (deleteThread != null)
-			{
-				if (!deleteThread.isAlive() && deleteThread.getState() != Thread.State.NEW)
-				{
-					scene.runPopup.addAction(
-						Actions.sequence(
-							Actions.alpha(1f),
-							Actions.delay(.5f),
-							Actions.alpha(0f, .4f),
-							Actions.delay(1f),
-							Actions.run(new Runnable(){
-								@Override
-								public void run() {
-									Boogie.app.setScreen(new MainScreen());
-								}
-							})
-						)
-					);
-					
-				}	
-			}
-		}
-
 	};
 
 	@Override

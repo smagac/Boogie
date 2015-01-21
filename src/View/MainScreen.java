@@ -5,11 +5,11 @@ import app.DownloadUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.ai.Agent;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.ai.msg.MessageDispatcher;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -34,7 +34,7 @@ import com.badlogic.gdx.utils.JsonValue;
  * @author nhydock
  *
  */
-public class MainScreen implements Screen, Agent {
+public class MainScreen implements Screen, Telegraph {
 
 	/**
 	 * main git repository for downloading the latest version of the managed app
@@ -115,7 +115,7 @@ public class MainScreen implements Screen, Agent {
 		play.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.PlayGame);
+				MessageDispatcher.getInstance().dispatchMessage(null, scene, StateMessage.PlayGame);
 			}		
 		});
 		buttonList.add(play).expandX().align(Align.right).row();
@@ -265,6 +265,10 @@ public class MainScreen implements Screen, Agent {
 		uiMachine.changeState(States.Home);
 		
 		Gdx.input.setInputProcessor(ui);
+		
+		MessageDispatcher.getInstance().addListener(this, StateMessage.DownloadCompleted);
+		MessageDispatcher.getInstance().addListener(this, StateMessage.DownloadFailed);
+		MessageDispatcher.getInstance().addListener(this, StateMessage.DownloadCancelled);
 	}
 
 	@Override
@@ -273,17 +277,12 @@ public class MainScreen implements Screen, Agent {
 	}
 
 	@Override
-	public void update(float delta) {
-		uiMachine.update();
-	}
-
-	@Override
 	public void render(float delta) {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		
 		ui.act(delta);
-		update(delta);
+		uiMachine.update();
 		
 		ui.draw();
 	}
