@@ -1,4 +1,4 @@
-package View;
+package github.nhydock.boogie.view;
 /**
  * Telegram message types corresponding with UI options
  * @author nhydock

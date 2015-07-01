@@ -1,13 +1,14 @@
-package View;
+package github.nhydock.boogie.view;
 
-import app.Boogie;
-import app.DownloadUtils;
+import github.nhydock.boogie.Boogie;
+import github.nhydock.boogie.DownloadUtils;
+import github.nhydock.boogie.view.MainScreen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.fsm.StateMachine;
-import com.badlogic.gdx.ai.msg.MessageDispatcher;
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.ai.msg.Telegraph;
 import com.badlogic.gdx.files.FileHandle;
@@ -24,8 +25,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
@@ -69,7 +70,7 @@ public class MainScreen implements Screen, Telegraph {
 		//prepare the ui
 		ui = new Stage();
 		uiMachine = new DefaultStateMachine<MainScreen>(this);
-		final Skin skin = new Skin(Gdx.files.classpath("data/uiskin.json"));
+		final Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
 		
 		//load values from preferences json
 		JsonReader j = new JsonReader();
@@ -115,7 +116,7 @@ public class MainScreen implements Screen, Telegraph {
 		play.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				MessageDispatcher.getInstance().dispatchMessage(null, scene, StateMessage.PlayGame);
+				MessageManager.getInstance().dispatchMessage(null, scene, StateMessage.PlayGame);
 			}		
 		});
 		buttonList.add(play).expandX().align(Align.right).row();
@@ -124,7 +125,7 @@ public class MainScreen implements Screen, Telegraph {
 		settings.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.OpenSettings);
+				MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.OpenSettings);
 			}		
 		});
 		buttonList.add(settings).expandX().align(Align.right).row();
@@ -133,7 +134,7 @@ public class MainScreen implements Screen, Telegraph {
 		update.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.UpdateGame);
+				MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.UpdateGame);
 			}		
 		});
 		buttonList.add(update).expandX().align(Align.right).row();
@@ -146,7 +147,7 @@ public class MainScreen implements Screen, Telegraph {
 			readme.addListener(new ChangeListener(){
 				@Override
 				public void changed(ChangeEvent event, Actor actor) {
-					MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.OpenReadme);
+					MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.OpenReadme);
 				}		
 			});
 			buttonList.add(readme).expandX().align(Align.right).row();
@@ -188,7 +189,7 @@ public class MainScreen implements Screen, Telegraph {
 		quit.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.ExitGame);
+				MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.ExitGame);
 			}		
 		});
 		buttonList.add(quit).expandX().align(Align.right).row();
@@ -228,7 +229,7 @@ public class MainScreen implements Screen, Telegraph {
 			public void changed(ChangeEvent event, Actor actor) {
 				if (confirmButton.isChecked())
 				{
-					MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.Clean);
+					MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.Clean);
 					confirmButton.setChecked(false);
 				}
 			}
@@ -241,7 +242,7 @@ public class MainScreen implements Screen, Telegraph {
 			public void changed(ChangeEvent event, Actor actor) {
 				if (rejectButton.isChecked())
 				{
-					MessageDispatcher.getInstance().dispatchMessage(0, scene, scene, StateMessage.Home);
+					MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.Home);
 					rejectButton.setChecked(false);
 				}
 			}
@@ -266,9 +267,9 @@ public class MainScreen implements Screen, Telegraph {
 		
 		Gdx.input.setInputProcessor(ui);
 		
-		MessageDispatcher.getInstance().addListener(this, StateMessage.DownloadCompleted);
-		MessageDispatcher.getInstance().addListener(this, StateMessage.DownloadFailed);
-		MessageDispatcher.getInstance().addListener(this, StateMessage.DownloadCancelled);
+		MessageManager.getInstance().addListener(this, StateMessage.DownloadCompleted);
+		MessageManager.getInstance().addListener(this, StateMessage.DownloadFailed);
+		MessageManager.getInstance().addListener(this, StateMessage.DownloadCancelled);
 	}
 
 	@Override

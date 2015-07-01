@@ -1,4 +1,4 @@
-package View;
+package github.nhydock.boogie.view;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Stage;

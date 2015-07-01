@@ -1,4 +1,4 @@
-package app;
+package github.nhydock.boogie;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,7 +28,7 @@ public class BuildHash {
 		
 		//first arg needs to be directory
 		String directory = args[0];
-		String output = "boogie.hash";
+		String output = "";
 		if (args.length > 1)
 		{
 			output = args[1];

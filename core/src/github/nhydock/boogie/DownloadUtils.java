@@ -1,21 +1,21 @@
-package app;
+package github.nhydock.boogie;
+
+import github.nhydock.boogie.view.StateMessage;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
+
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
 
-import View.StateMessage;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Net.HttpResponse;
-import com.badlogic.gdx.ai.msg.MessageDispatcher;
+import com.badlogic.gdx.ai.msg.MessageManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -81,14 +81,14 @@ public class DownloadUtils
 		@Override
 		public void failed(Throwable t)
 		{
-			MessageDispatcher.getInstance().dispatchMessage(null, StateMessage.DownloadFailed);
+			MessageManager.getInstance().dispatchMessage(null, StateMessage.DownloadFailed);
 			out.delete();
 		}
 
 		@Override
 		public void cancelled()
 		{
-			MessageDispatcher.getInstance().dispatchMessage(null, StateMessage.DownloadCancelled);
+			MessageManager.getInstance().dispatchMessage(null, StateMessage.DownloadCancelled);
 			out.delete();
 		}
 
@@ -166,7 +166,7 @@ public class DownloadUtils
 		{
 			if (tempFiles.size >= size)
 			{
-				MessageDispatcher.getInstance().dispatchMessage(null, StateMessage.DownloadCompleted);
+				MessageManager.getInstance().dispatchMessage(null, StateMessage.DownloadCompleted);
 			}
 		}
 
@@ -284,7 +284,7 @@ public class DownloadUtils
 						Gdx.net.sendHttpRequest(get, new FileDownloader(file, after));
 					}
 				} else {
-					MessageDispatcher.getInstance().dispatchMessage(null, StateMessage.DownloadCompleted);
+					MessageManager.getInstance().dispatchMessage(null, StateMessage.DownloadCompleted);
 				}
 			}
 			

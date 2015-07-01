@@ -1,4 +1,4 @@
-package View;
+package github.nhydock.boogie.view;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.StateMachine;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -11,8 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonValue;
 
 

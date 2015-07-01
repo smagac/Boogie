@@ -1,9 +1,9 @@
-package View;
+package github.nhydock.boogie.view;
+
+import github.nhydock.boogie.Boogie;
+import github.nhydock.boogie.DownloadUtils;
 
 import java.io.IOException;
-
-import app.Boogie;
-import app.DownloadUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.State;
