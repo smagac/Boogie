@@ -35,6 +35,7 @@ project(":desktop") {
     dependencies {
         compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }
@@ -52,3 +53,13 @@ project(":core") {
 tasks.eclipse.doLast {
     delete ".project"
 }
+
+task dist << {
+    copy {
+        from 'desktop'
+        into 'dist'
+        include 'boogie.cfg'
+    }
+}
+
+dist.dependsOn = [":desktop:dist"]
