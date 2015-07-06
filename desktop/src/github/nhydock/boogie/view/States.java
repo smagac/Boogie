@@ -3,6 +3,7 @@ package github.nhydock.boogie.view;
 import github.nhydock.boogie.Boogie;
 import github.nhydock.boogie.DownloadUtils;
 
+import java.awt.DisplayMode;
 import java.io.IOException;
 
 import com.badlogic.gdx.Gdx;
@@ -12,6 +13,8 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 
 /**
  * Defined states for the UI's interactions
@@ -308,7 +311,23 @@ enum States implements State<MainScreen>
 				public void run(){
 					Process game;
 					try {
-						String cmd = scene.cmd + scene.settings.getValuesArg();
+					    JsonReader reader = new JsonReader();
+					    JsonValue cfg = reader.parse(Gdx.files.internal(Boogie.GAME_DIR + "game.cfg"));
+				        String os = System.getProperty("os.name");
+				        String cmd;
+				        if (os.toLowerCase().contains("OS X"))
+				        {
+				            cmd = cfg.get("execute").getString("mac");
+				        } else if (os.toLowerCase().contains("windows"))
+				        {
+				            cmd = cfg.get("execute").getString("win");
+				        } else
+				        {
+				            cmd = cfg.get("execute").getString("nix");
+				        }
+				        System.out.println(os + " " + cmd);
+				        
+						cmd += scene.settings.getValuesArg();
 						
 						ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
 						pb.directory(DownloadUtils.internalToAbsolute(Boogie.GAME_DIR).file());
@@ -357,7 +376,7 @@ enum States implements State<MainScreen>
 			{
 				if (!watchThread.isAlive() && watchThread.getState() != Thread.State.NEW)
 				{
-					scene.uiMachine.changeState(Home);
+				    scene.uiMachine.changeState(Home);
 					watchThread = null;
 				}	
 			}

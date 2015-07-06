@@ -42,11 +42,6 @@ public class MainScreen implements Screen, Telegraph {
 	 */
 	String repository;
 	
-	/**
-	 * Command executed depending on your operating system
-	 */
-	String cmd;
-	
 	//key ui elements
 	Actor mainButtons;
 	SettingsPane settings;
@@ -75,18 +70,6 @@ public class MainScreen implements Screen, Telegraph {
 		//load values from preferences json
 		JsonReader j = new JsonReader();
 		JsonValue cfg = j.parse(Gdx.files.internal("boogie.cfg"));
-		String os = System.getProperty("os.name");
-		if (os.toLowerCase().contains("OS X"))
-		{
-			cmd = cfg.get("game").get("execute").getString("mac");
-		} else if (os.toLowerCase().contains("windows"))
-		{
-			cmd = cfg.get("game").get("execute").getString("win");
-		} else
-		{
-			cmd = cfg.get("game").get("execute").getString("nix");
-		}
-		System.out.println(os + " " + cmd);
 		repository = cfg.getString("url");
 		
 		//fill the background with a cfg defined background
