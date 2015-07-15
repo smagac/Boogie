@@ -70,7 +70,7 @@ public class MainScreen implements Screen, Telegraph {
 		//load values from preferences json
 		JsonReader j = new JsonReader();
 		JsonValue cfg = j.parse(Gdx.files.internal("boogie.cfg"));
-		repository = cfg.getString("url");
+		repository = cfg.getString("url", null);
 		
 		//fill the background with a cfg defined background
 		background = new Image(
@@ -113,14 +113,16 @@ public class MainScreen implements Screen, Telegraph {
 		});
 		buttonList.add(settings).expandX().align(Align.right).row();
 		
-		TextButton update = new TextButton("Update", skin, "title");
-		update.addListener(new ChangeListener(){
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.UpdateGame);
-			}		
-		});
-		buttonList.add(update).expandX().align(Align.right).row();
+		if (repository != null) {
+			TextButton update = new TextButton("Update", skin, "title");
+			update.addListener(new ChangeListener(){
+				@Override
+				public void changed(ChangeEvent event, Actor actor) {
+					MessageManager.getInstance().dispatchMessage(0, scene, scene, StateMessage.UpdateGame);
+				}		
+			});
+			buttonList.add(update).expandX().align(Align.right).row();
+		}
 		
 		//parse and load readme file if it exists
 		FileHandle readmeFile = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR+"/README");
@@ -193,7 +195,11 @@ public class MainScreen implements Screen, Telegraph {
 		ui.addActor(updateLabel);
 		
 		//prepare run popup label
-		runPopup = new Label("The Game is Running", skin, "title");
+		if (DownloadUtils.gameExists()) {
+			runPopup = new Label("The Game is Running", skin, "title");
+		} else {
+			runPopup = new Label("Game files are missing or are corrupted.  Please redownload the game.", skin, "title");
+		}
 		runPopup.pack();
 		runPopup.setPosition(ui.getWidth() / 2f - runPopup.getWidth() / 2f, ui.getHeight() / 2f - runPopup.getHeight() / 2f);
 		runPopup.setColor(1,1,1,0);

@@ -30,7 +30,7 @@ enum States implements State<MainScreen>
 		@Override
 		public void enter(final MainScreen scene) {
 			//make sure the game is set up and cloned before allowing the game to be played/launched
-			if (!DownloadUtils.gameExists())
+			if (!DownloadUtils.gameExists() && scene.repository != null)
 			{
 				//make sure all the folders for the downloading exists
 				final FileHandle gameDir = DownloadUtils.internalToAbsolute(Boogie.GAME_DIR);
@@ -307,57 +307,74 @@ enum States implements State<MainScreen>
 		
 		@Override
 		public void enter(final MainScreen scene) { 
-			final Runnable watch = new Runnable(){
-				public void run(){
-					Process game;
-					try {
-					    JsonReader reader = new JsonReader();
-					    JsonValue cfg = reader.parse(Gdx.files.internal(Boogie.GAME_DIR + "game.cfg"));
-				        String os = System.getProperty("os.name");
-				        String cmd;
-				        if (os.toLowerCase().contains("OS X"))
-				        {
-				            cmd = cfg.get("execute").getString("mac");
-				        } else if (os.toLowerCase().contains("windows"))
-				        {
-				            cmd = cfg.get("execute").getString("win");
-				        } else
-				        {
-				            cmd = cfg.get("execute").getString("nix");
-				        }
-				        System.out.println(os + " " + cmd);
-				        
-						cmd += scene.settings.getValuesArg();
-						
-						ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
-						pb.directory(DownloadUtils.internalToAbsolute(Boogie.GAME_DIR).file());
-						game = pb.start();
-						game.waitFor();
-						
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					game = null;
-				}
-			};
-			
-			scene.mainButtons.addAction(Actions.alpha(0f, .2f));
-			scene.runPopup.addAction(
-				Actions.sequence(
-					Actions.alpha(0f),
-					Actions.alpha(1f, .4f),
-					Actions.delay(1f),
-					Actions.run(new Runnable(){
-						public void run(){
-							watchThread = new Thread(watch);
-							watchThread.start();
+			if (DownloadUtils.gameExists()) {
+				final Runnable watch = new Runnable(){
+					public void run(){
+						Process game;
+						try {
+						    JsonReader reader = new JsonReader();
+						    JsonValue cfg = reader.parse(Gdx.files.internal(Boogie.GAME_DIR + "game.cfg"));
+					        String os = System.getProperty("os.name");
+					        String cmd;
+					        if (os.toLowerCase().contains("OS X"))
+					        {
+					            cmd = cfg.get("execute").getString("mac");
+					        } else if (os.toLowerCase().contains("windows"))
+					        {
+					            cmd = cfg.get("execute").getString("win");
+					        } else
+					        {
+					            cmd = cfg.get("execute").getString("nix");
+					        }
+					        System.out.println(os + " " + cmd);
+					        
+							cmd += scene.settings.getValuesArg();
+							
+							ProcessBuilder pb = new ProcessBuilder(cmd.split(" "));
+							pb.directory(DownloadUtils.internalToAbsolute(Boogie.GAME_DIR).file());
+							game = pb.start();
+							game.waitFor();
+							
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-					})
-				)
-			);
-			scene.ui.getRoot().setTouchable(Touchable.disabled);
+						game = null;
+					}
+				};
+				
+				scene.mainButtons.addAction(Actions.alpha(0f, .2f));
+				scene.runPopup.addAction(
+					Actions.sequence(
+						Actions.alpha(0f),
+						Actions.alpha(1f, .4f),
+						Actions.delay(1f),
+						Actions.run(new Runnable(){
+							public void run(){
+								watchThread = new Thread(watch);
+								watchThread.start();
+							}
+						})
+					)
+				);
+				scene.ui.getRoot().setTouchable(Touchable.disabled);
+			} else {
+				scene.mainButtons.addAction(Actions.alpha(0f, .2f));
+				scene.runPopup.addAction(
+					Actions.sequence(
+						Actions.alpha(0f),
+						Actions.alpha(1f, .4f),
+						Actions.delay(3f),
+						Actions.run(new Runnable(){
+							public void run(){
+								scene.uiMachine.changeState(Home);
+							}
+						})
+					)
+				);
+				scene.ui.getRoot().setTouchable(Touchable.disabled);
+			}
 		}
 		@Override
 		public void exit(MainScreen scene) { 
