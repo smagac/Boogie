@@ -61,6 +61,7 @@ public class DownloadUtils
 			downloaders.add(this);
 
 			internalToAbsolute(".tmp/").file().mkdir();
+			temp.parent().mkdirs();
 			try (ReadableByteChannel rbc = Channels.newChannel(httpResponse.getResultAsStream());
 					FileOutputStream fos = new FileOutputStream(out))
 			{
@@ -313,6 +314,7 @@ public class DownloadUtils
 		{
 			FileHandle tmp = tempFiles.get(file);
 			FileHandle out = internalToAbsolute(Boogie.GAME_DIR + file);
+			out.parent().mkdirs();
 			Gdx.app.log("Move", "moving to " + out.path());
 			try
 			{
@@ -325,6 +327,7 @@ public class DownloadUtils
 
 		tempFiles.clear();
 		toDelete.clear();
+		Gdx.files.internal(".tmp").deleteDirectory();
 	}
 
 	/**
